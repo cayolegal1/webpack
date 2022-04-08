@@ -1,0 +1,117 @@
+el modo watch de webpack es básicamente un comando que ejecutamos en la terminal el cual este se quedará escuchando 
+o estando pendiente de cambios en el código para poder compilarlo 
+
+El modo watch hace que nuestro proyecto se compile de forma automática
+Es decir que está atento a cambios
+
+lo primero que haremos es irnos a nuestro archivo de config en modo desarrollo, y agregaremos un flag o key 
+el cual se llama watch con valor de true
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+
+    mode: 'development',
+    watch: true,
+
+    resolve: {
+
+        extensions: ['.js'],
+
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/'),
+            '@images': path.resolve(__dirname, 'src', 'assets', 'images/'),
+            '@templates': path.resolve(__dirname, 'src', 'templates/' ),
+            '@styles': path.resolve(__dirname, 'src', 'styles/'),
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        }),
+
+        new dotEnvWebpack()
+    ],
+
+}
+
+esto hará que podamos correr el comando de desarrollo cada vez que estemos haciendo algún cambio en el código y obtener 
+de una manera más rápida el debugeo en nuestro código
+
+este proyecto es pequeño, en proyectos mas grandes la compilación tardará mas de lo que esperamos por lo que 
+el estar escuchando los cambios con watch es una opción buena para ver nuestros cambios reflejados al instante, 
+vs de esperar un monton si lo hacemos manualmente (dependiendo de la complejidad y largor del código, obvio)

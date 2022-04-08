@@ -1,0 +1,840 @@
+uno de los objetivos principales a la hora de usar webpack es poder optimizar y minificar nuestros archivos, sean estos archivos html, css, javascript, imágenes, etc etc. 
+
+minimizar el proyecto quiere decir que todo el código este escrito en una sola línea, por lo que el navegador o el software que lee el código no tendrá que leer muchas líneas de código y asi producir un poco más de espera en la carga, sin embargo cuando lo minificamos este se reducirá a una sola línea y podrá cargar el contenido más rápido
+
+Para poder lograr lo mencionado en nuestro proyecto el primer paso 
+a seguir es instalar unos paquetes que nos ayudarán a realizar nuestro objetivo. Primero partiremos minificando 
+nuestros archivos css: 
+
+- npm install css-minimizer-webpack-plugin terser-webpack-plugin -D 
+
+luego agregaremos estos recursos a nuestra configuración de webpack, importando estos plugins en nuestro archivo 
+de configuración de webpack 
+
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+
+y ahora del terser plugin 
+
+const TercerWebpackPlugin = require('terser-webpack-plugin')
+
+este plugin minifica los archivos de JS. Viene incluido en Webpack v5, pero tienes que instalar el plugin si quieres modificar la configuración. 
+
+para más info https://webpack.js.org/plugins/terser-webpack-plugin/
+
+y luego, añadiremos una nueva sección en nuestra configuración, el cual se llamará optimizacion, ya que de eso 
+se encargan los paquetes instalados en esta parte, y este será un objeto con ciertas configuraciones
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimizacion: {
+
+    }
+}
+
+y el primer atributo de nuestro objeto será minimize con el valor de true, con eso le decimos a webpack que estamos 
+queriendo minificar nuestros archivos
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimizacion: {
+
+        minimize: true,
+    }
+}
+
+y el siguiente atributo será minimizer, el cual recibe como valor el paquete del cual se encargará de realizar la 
+tarea, su valor será un arreglo con los minimizer que usemos
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+        ]
+    }
+}
+
+
+y instanciamos nuestro primer minimizer que en este caso es el paquete que instalamos, CssMinimizerPlugin
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin()
+        ]
+
+    }
+}
+
+
+
+como también el minimizer TercerWebpackPlugin que instalamos como paquete:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserWebpackPlugin()
+            
+        ]
+    }
+}
+
+de esta forma ya añadimos el minimizer para CSS que viene siendo el CssMinimizerPlugin y para javascript que es el 
+TerserWebpackPlugin
+
+ahora que agregamos estos dos optimizadores o minificadores, otra buena forma de optimizar nuestro proyecto es agregar 
+hashes a nuestros archivos, pero por qué? 
+
+¿Por qué es importante usar Hashes en nuestros archivos?
+Los recursos que se guardan en memoria cache suceden cuando el navegador entra a un sitio por primera vez detecta los recursos y los guarda. Por ello la siguiente vez sera mucho más rápido porque estarán en memoria
+La desventaja esta cuando sacamos una nueva versión, porque tendrán un mismo nombre evitando que se descargue los nuevos cambios, por lo tanto, el usuario no recibirá los nuevos cambios
+Para que no haya conflictos con la cache una vez que tengamos nuestro proyecto en producción es importante darles un hash para cada nueva versión
+
+entonces ahora que sabemos los beneficios de usar hashes es momento de configurar nuestros archivos para que estos 
+lo tengan, lo primero es en la sección de 'output' de nuestra configuración principal, en donde estamos declarando a webpack que el output de nuestro JS será main.js, en el atributo filename, cambiaremos el valor a 
+'[name].[contenthash].js'
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+con eso nuestros archivos de js ya estarán hasheados y tendrán el beneficio mencionado más arriba :D
+
+ahora podemos agregar algunas configuraciones a nuestro CssMinimizerPlugin y al TerserMinimizerPlugin, partiendo 
+primero por el de CssMinimizerPlugin, en donde crearemos un objeto en su instanciación 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+y luego daremos una pequeña configuración en nuestro MiniCssExtractPlugin, en donde en la instanciación del 
+paquete o plugin, crearemos un objeto en donde configuraremos hacia donde irán nuestros archivos css, y que estos 
+estén hasheados con '[name][contenthash].css', siempre es importante cuando usamos [name][contenthash] que nos permite hashear nuestros archivos, poner la extensión del o de los archivos a los cuales nos estamos refiriendo. Todo 
+lo mencionado de la configuración irá con el atributo filename
+
+para más info sobre [hash] y [contenthash]: 
+https://stackoverflow.com/questions/35176489/what-is-the-purpose-of-webpack-hash-and-chunkhash
+
+el contenthash básicamente agregará un nuevo hash a un archivo cuando este sufra un cambio en el código 
+
+
+entonces añadamos esa configuración
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+            
+            filename: 'assets/[name].[contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+
+luego podemos correr nuestro comando de ejecución de webpack y tendremos nuestros archivos de css y javascript 
+hasheados y minificados :D 
+
+
+estos tendrán el nombre, así como pusimos en la configuración [name]. y el hash [contenthash] mas la extensión
+
+[name].[contenthash].ext
+
+diferencia entre hash, contenthash y chunkhash:
+
+hash: Cuando hacemos build del proyecto, todos los archivos van a tener el mismo hash ya que todos los archivos provienen del mismo build. Si hacemos un cambio en un archivo, y volvemos a hacer build del proyecto, todos los archivos van a tener este nuevo hash. Sencillo, ¿no?
+
+chunkhash: Todos los archivos pertenecientes al mismo chunk, van a tener el mismo hash. En nuestro ejemplo los dos archivos del chunk “index” tienen un mismo hash y los archivos del chunk “vendors” tienen otro hash. Si hacemos cambios en un archivo del chunk index, estos van a tener un nuevo hash pero los del chunk vendors no, y lo mismo sucede en caso contrario. ¿Me expliqué bien?
+
+contenthash: Más fácil aún, cada archivo tendrá su propio hash ya que el hash es generado apartir del contenido del archivo. Si un archivo sufre un cambio, solo este archivo tendrá un nuevo hash.
+Espero mi respuesta te sea de utilidad 😄
+
+
+OBS IMPORTANTE: 
+
+como saber cuadno un parametro va encerrado en [] o exactamente que valores poner?
+
+Son requisitos impuestos por los creadores de webpack para unificar la implementación de dicha herramienta, eso es todo. Lo dice en la documentación oficial.
+
+https://webpack.js.org/concepts/output/
+
+“The minimum requirement for the output property in your webpack configuration is to set its value to an object and provide an output.filename to use for the output file(s):”

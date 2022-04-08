@@ -1,0 +1,233 @@
+lo que haremos con nuestras imágenes es llamarlas desde un import en nuestro código y guardarlas en una variable 
+para que webpack se encargue del renderizado de los mismos, con el paquete assets-module que nos provee webpack, 
+para así no requerir de ningún loader, sino que webpack nos provee directamente los recursos.
+
+lo primero que debemos hacer es configurar nuestro archivo webpack para permitirnos trabajar con imágenes, en la parte 
+de modules, debemos agregar una nueva regla: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            },
+
+            {
+
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+entonces agregamos la expresión regular que nos permitirá identificar los archivos con los que debemos trabajar
+
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            },
+
+            {
+                test: /\.png|.jpg|.jpeg$/
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+luego agregaremos un nuevo atributo el cual indicaremos el tipo de archivo para que webpack lo pueda identificar, 
+que en este caso es 'asset/resource'. Esto nos permitirá hacer imports de nuestros archivos y manejarlos con 
+variables.
+
+para mas info: https://webpack.js.org/guides/asset-modules/#resource-assets
+            https://webpack.js.org/guides/asset-modules/
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            },
+
+            {
+                test: /\.png|.jpg|.jpeg$/,
+                type: asset/resource
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+luego de hacer todo eso debemos importar en nuestro template los archivos que estamos deseando utilizar, como una 
+variable
+
+import gitHub from '../assets/images/github.png'
+import Instagram from '../assets/images/instagram.png'
+import Twitter from '../assets/images/twitter.pgn'
+
+Y luego de eso en la parte de las fuentes o rutas cambiamos esa ruta por esa variable, un ejemplo: 
+
+ <a href="https://twitter.com/gndx">
+    <img src="${gitHub}" />
+</a>
+
+no usamos los templates literals debido a que todo el template ya se encuentra dentro de ellas
+
+Luego de eso corremos nuestro comando para ejecutar webpack: 
+
+- npm run production
+
+Y automaticamente webpack creará 3 archivos nuevos, con hashes, esto evitará que a través de un inspector puedan acceder a las imágenes completas, esto es útil cuando son fotos con derechos de autor por ejemplo.
+
+
+¿Que ventaja, utilidad o uso tiene ponerle hash a las imágenes?
+
+Evita que dos imágenes con el mismo nombre y extensión colisionen y se sobre escriban.
+Rompes el caché del navegador. Eso significa que si modificas algún icono en la carpeta assets y le dejas mismo nombre que tenia, cuando sea publicado obligas al navegador a mostrar la última versión que subiste, por que el nombre de la imagen en la carpeta dist va a ser totalmente diferente,
+Mas info. al respecto: https://www.alainschlesser.com/bust-cache-content-hash/
+
+
+Al hacer esta accion.¿En que le afecta al proyecto en si? Sea bueno o malo.
+
+Los archivos que vemos dentro de la carpeta dist, son autogenerados por WebPack. Si se agrega manualmente algún archivo allí, como una imagen en este caso, se corre el riesgo de que al borrar la carpeta dist y generarla nuevamente por medio de WebPack, se pierda esa imagen. Como se ve en el video, WebPack 5 da solución a este problema.
+
+Algunos Pros:
+
+Manejas el src de las imágenes de forma abstracta y más ordenada.
+
+Quizás esté faltando alguna configuración extra, pero si la generación del hash para el nombre de la imagen fuese dinámica, obligas al navegador a romper el caché de la misma. Es decir; si actualizas el icono, por mas que se llame de la misma forma en tu repo, cuando la publiques obligas al navegador a romper el caché de la imagen para mostrar la última versión que subiste.

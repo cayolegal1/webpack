@@ -1,0 +1,6 @@
+hacer deployment es el hecho de poner nuestra aplicación en la web ya funcionando, existen diversas plataformas 
+encargadas de ello. En este momento, utilizaremos Netlify como nuestra plataforma 
+
+Lo primero a realizar es crearnos una cuenta en www.netlify.com, usamos nuestra cuenta de Github para ello. 
+
+Segundo, crearemos un repositorio en donde alojaremos este proyecto

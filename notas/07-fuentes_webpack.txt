@@ -1,0 +1,830 @@
+una buenisima forma de optimizar nuestro proyecto, al hacer llamados externos de fuentes ya sea google fonts o otros, 
+es incorporar estas fuentes a nuestros proyectos, para que no tenga que hacer el llamado a estas y que el proyecto 
+en si se vuelva más pesado. 
+
+asi que vamos a optimizar las fuentes para hacerlo de manera local en nuestra configuración de webpack. 
+
+lo primero a identificar son las fuentes que estams usando
+
+y son las que tenemos en src/assets/fonts 
+
+entonces nos iremos a nuestro main.css de nuestro source(src) y agregaremos localmente a esas fuentes, ya que en el 
+archivo ahora mismo la estamos consumiendo desde la web
+
+@font-face {
+	font-family: 'Ubuntu';
+	src: url('../assets/fonts/ubuntu-regular.woff2') format('woff2'),
+		url('../assets/fonts/ubuntu-regular.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+		
+}
+
+agregamos esto, y comentamos el pedido de fuentes desde la web
+
+ahora, necesitamos copiar desde assets hacia la carpeta dist nuestros archivos o fuentes, y eso lo lograremos 
+instalando 2 dependencias, uno lee archivos y otro nos ayuda a moverlos segun sea el caso. Estos son url-loader y el
+otro file-loader:
+
+- npm install url-loader file-loader -D
+
+luego de instalarlos con éxito, debemos agregar una nueva regla en nuestro archivo de configuración de webpack.
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y como de costumbre, usamos la regla para leer los archivos que estamos esperando manipular"
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y tambien usamos el use para determinar el loader a utilizar, y dentro de este algunas configuraciones con 
+el atributo option, para decirle donde están los archivos y esas cosas... Usaremos como primera configuración a 
+limit con un valor de 10.000. O LE PASAMOS UN BOOLEANOS TRUE O FALSE. Habilita o deshabilita la transformación de
+archivos en base64.
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+luego el segundo atributo será mimetype, que significa o contendrá el tipo de dato que tendrá, que en este caso es 
+application/font-woff. Los MIME Types (Multipurpose Internet Mail Extensions) son la manera standard de mandar 
+contenido a través de la red. En este atributo especifica el tipo MIME con el que se alineará el archivo.
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff'
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+luego de eso, le colocaremos el name, que tendrá como atributo a name, y de valor tendrá "[name].[ext]", respetando 
+así el nombre y la extensión del archivo o la fuente a copiar(woff y woff2). EL NOMBRE INICIAL DEL ARCHIVO + SU 
+EXTENSIÓN PUEDES AGREGARLE [name]hola.[ext] y el output del archivo seria ubuntu-regularhola.woff
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff',
+                        name: "[name].[ext]"
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+luego de eso, estableceremos un output, es decir, en donde o en que ruta queremos que se coloque al momento de copiar 
+el archivo, utilizaremos el mismo atributo del cual estamos mencionando, outputPath, y su valor, 
+la ruta destino deseada, hay que recordar que no ponemos la carpeta dist ya que por defecto todo el trabajo de 
+webpack irá ahí, debemos posicionarnos en la la ubicación donde estamos './' y a partir de ahi determinar que lugar 
+queremos utilizar para nuestros archivos. 
+
+EL DIRECTORIO DE SALIDA (SIN COMPLICACIONES)
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff'
+                        name: "[name].[ext]",
+                        outputPath: "./assets/fonts"
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y luego el publicPath, ver clase 13
+EL DIRECTORIO PUBLICO (SIN COMPLICACIONES)
+
+Como publicPath es utilizado por varios plugins de Webpack para actualizar las DIRECCIONES URL dentro del CSS.
+lo que se hizo es como si estuvieras en el css:
+
+publicPath: '../assets/fonts/'
+
+// Desarrollo:
+@font-face {
+	font-family: 'Ubuntu';
+	src: url('../assets/fonts/ubuntu-regular.woff2') format('woff2'),
+		url('../assets/fonts/ubuntu-regular.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+}
+
+
+4
+no entendí por que cambiamos el publicPath, en que nos basamos para decidir cómo definir los valores de esas propiedades?
+
+Recuerda que dos clases atras Oscar mencionó que se cambiaría el directorio del css, entonces cuando se genera el build, el css busca las fonts dentro de la misma carpeta, pero necesita salirse de la carpeta de styles e irse a la carpeta font
+
+ver clase 15 para entender sobre public path
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff'
+                        name: "[name].[ext]",
+                        outputPath: "./assets/fonts",
+                        publicPath: "./assets/fonts",
+
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y tambien agregaremos otro atributo, el cual diremos que esto no es un Módulo, con el key esModule con el valor 
+de false
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff'
+                        name: "[name].[ext]",
+                        outputPath: "./assets/fonts",
+                        publicPath: "./assets/fonts",
+                        esModule: false
+
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y luego de eso, nos iremos hacia el output principal, es decir, el primero, en donde le diremos a webpack con un atributo específico de hacia donde queremos que se guarden nuestros assets, este atributo se llama assetModuleFilename, el cual le daremos un valor del cual este permitirá que webpack convierta el nombre del archivo en un hash así como las imágenes. 
+Esta instrucción hace que webpack le agregue un hash ( un hash es una serie de caracteres aleatorios) y su extencion por medio de esas variables en el string 
+
+el valor será 'assets/images/[hash][ext][query]'
+
+
+esta línea de código lo que hace es mover la imagenes a la carpeta images dentro de la carpeta assets. Además le asigna un nombre de acuerdo al hash de la imagen, la extensión y el query.
+
+lo que hace query al final es una referencia al archivo que esta mandando a llamar, para más info: 
+
+https://webpack.js.org/guides/asset-modules/#custom-output-filename
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'application/font-woff'
+                        name: "[name].[ext]",
+                        outputPath: "./assets/fonts",
+                        publicPath: "./assets/fonts",
+                        esModule: false
+
+                    }
+                }
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+y toda esta configuración nos deberia crear una carpeta en assets, el cual se llama fonts, y adentro las dos fuentes 
+que estaremos utilizando con su nombre hasheado, que son las que definimos en nuestro css :D
+
+podemos correr nuestro proyecto para ver si todo funciona 
+
+- npm run production
+
+nuestro output en la terminal será cada vez más grande debido a que estamos añadiendo cada vez más complejidad a nuestro recurso, lo del template, html, css, imagenes, copia de archivos, fuentes, etc
+
+
+---"OBS IMPORTANTE"---: en webpack 5 ya no es necesario utilizar url-loader, ya que este no funcionará, en la parte de use omitir toda la configuración y agregar esto a la regla de fuentes
+
+type: 'asset/resource',
+generator: {
+    filename: 'assets/fonts/[hash][ext][query]',
+},
+},
+
+el generator básicamente funciona como assetModuleFilename según la documentación, y funciona solo con los módulos de tipo  asset y asset/resource, que basicamente es lo que ponemos en el atributo type de nuestra regla. 
+
+por lo que quedaría asi: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+por lo que al correr nuestro comando webpack todo funcionará y las fuentes se agregarán :D

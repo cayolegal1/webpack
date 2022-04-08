@@ -1,0 +1,163 @@
+webpack en modo de producción nos permite limpiar nuestro proyecto, es decir, ahora mismo tenemos varios archivos 
+del mismo código, pero con diferentes hashes, eso realmente no es lo que esperamos, sino no tener ningún archivo
+duplicado para la puesta en producción, entonces cada vez que corramos webpack en modo producción, queremos tener 
+nuestro proyecto como hemos mencionado. Para lograr esto debemos instalar un paquete o un plugin llamado 
+clean-webpack:
+
+- npm install clean-webpack-plugin -D
+
+entonces ahora nos moveremos a hacer la configuración necesaria en nuestro archivo de configuración de webpack 
+el cual es el de producción, ya que ahora podemos diferenciar entre el de producción y el de desarrollo, el cual 
+el de producción nos permitirá como hemos mencionado tener nuestra carpeta distribution bien optimizada y lista 
+para ponerla en producción
+
+una vez en nuestro archivo importaremos el plugin que instalamos 
+
+const { CleanPlugin } = require('clean-webpack-plugin')
+
+ahora nos preguntaremos: por que estamos declarando como un objeto? a esto se le llama desestructuración del objeto, 
+es decir, si tenemos este código 
+
+const objeto = {
+
+    a: 1,
+    b: 2
+}
+
+hacer esto: 
+
+{a} = objeto 
+
+console.log(a)
+
+será lo mismo que hacer esto: 
+
+console.log(objeto.a)
+
+es solo una manera diferente de trabajar con las variables, o en este caso, objetos. Pero con webpack debemos 
+importar el plugin instalado de esta manera porque así lo quiso el desarrollador del paquete que estamos importando
+
+una vez importado el paquete, nos iremos a la parte de plugins y agregaremos este:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js'],
+
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/'),
+            '@images': path.resolve(__dirname, 'src', 'assets', 'images/'),
+            '@templates': path.resolve(__dirname, 'src', 'templates/' ),
+            '@styles': path.resolve(__dirname, 'src', 'styles/'),
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        }),
+
+        new dotEnvWebpack(), 
+
+        new CleanPlugin()
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin(),
+
+        ]
+    }
+}
+
+ahora demos un ojo a como esta nuestra carpeta dist, luego correr el comando production y ver como se optimiza :D
+
+con eso entonces ya tenemos nuestra carpeta distribution limpia y lista para producción
+
+hay que tener en cuenta que cada vez que corramos el archivo de desarrollo, webpack nos creará un archivo nuevo 
+diferente al de producción con su respectivo hash, pero luego podemos limpiarlo puesto que tenemos la configuración 
+necesaria
+
+
+
+OBS: 
+Webpack ahora tiene un flag clean que permite limpiar el output directory https://webpack.js.org/guides/output-management/#cleaning-up-the-dist-folder, es una buena alternativa para no tener que instalar mas dependencias, aqui hay un issue donde piden deprecar el plugin para que solo se use el flag nativo de webpack https://github.com/johnagan/clean-webpack-plugin/issues/197

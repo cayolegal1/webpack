@@ -1,0 +1,334 @@
+para poder minificar nuestro css, debemos instalar un paquete de webpack que se encarga de eso, como también un plugin 
+que nos permitirá trabajar en diferentes archivos css y que webpack pueda unirlo:
+
+- npm install mini-css-extract-plugin css-loader -D 
+
+lo primero que tenemos que hacer tal cual lo hicimos con el script, es borrar del html nuestra hoja de estilos ya que 
+es innecesaria, porque webpack entenderá que ese es el archivo principal de css debido a nuestra configuración y no 
+hará falta que lo mencionemos en el html.
+
+lo siguiente que tenemos que hacer es irnos al archivo principal de js, el cual definimos con webpack en la configuración,
+el cual en este caso es index.js:
+
+import './styles/main.css'
+
+hacemos eso debido a que tenemos instalado el loader para css, y para recordar el concepto de loader es que nos 
+permite leer otra extensión de archivos y poder cargarlos en nuestro javascript. 
+
+Luego de hacer la importación nos vamos a nuestro archivo de webpack para hacer algunas configuraciones: 
+
+lo primero que haremos en el es importar el plugin que instalamos con un require: 
+
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+luego de hacer eso debemos añadir una nueva regla o rule como esta en nuestro módulo para la configuración del css: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        })
+    ]
+}
+
+y lo primero es hacer lo mismo que con javascript, usar expresiones regulares para poder identificar los archivos .css,
+el cual tenemos como atributo a test:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.css$/i,
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        })
+    ]
+}
+
+luego al igual que con javascript usamos el atributo use para indicar que paquete usaremos, en este caso el atributo 
+será un arreglo. Usaremos la importación del MiniCssExtractPlugin y su atributo loader, y por consiguiente indicaremos 
+con el siguiente elemento del arreglo que es loader será el css-loader: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader, 
+                    'css-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        })
+    ]
+}
+
+para entender un poquito más lo que estamos haciendo repasaremos algunos conceptos: 
+
+Fuera de contexto, webpack solamente entiende JavaScript y JSON. Los loaders nos permite procesar archivos de otros tipos para convertirnos en módulos válidos que serán consumidos por nuestras aplicaciones y agregadas como dependencias.
+
+En alto nivel, los loaders poseen 2 configuraciones principales:
+
+test - propiedad que identifica cuáles archivos deberán ser transformados
+use - propiedad que identifica el loader que será usado para transformar a dichos archivos
+Plugins
+Mientras los loaders transforman ciertos tipos de módulos, los plugins _son utilizados para extender tareas específicas, como la optimización de paquetes, la gestión de activos y la inyección de variables de entorno.
+
+Una vez importado el plugin, podemos desear el personalizarlos a través de opciones.
+
+bueno, siguiendo con el tema, una vez que ya configuramos el use, ahora debemos instanciar el plugin de css 
+que instalamos en la parte de plugins y ejecutarlo
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader, 
+                    'css-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }), 
+
+        new MiniCssExtractPlugin()
+    ]
+}
+
+hecha la instanciación, podemos ejecutar nuestro webpack para ver si estamos bien:
+
+- npx webpack --mode production or development --config webpack.config.js
+
+ahora, veremos un poquito de lo que es trabajar con preprocesadores css con webpack, en este caso sass, pero debemos 
+instalarlo en nuestro proyecto como también su loader: 
+
+- npm install node-sass sass-loader -D
+
+hecho eso podemos crear en nuestra carpeta de archivos alguna variable sass y darle eso al body: 
+
+$color-fill: red 
+
+body {
+
+    color: $color-fill
+}
+
+Luego hecho esos cambios nos iremos al index.js para importar nuestro archivo sass al igual que el de css, ya que 
+instalamos el sass-loader que nos permite leer en javascript archivos sass
+
+import './styles/styles.scss'
+
+luego para poder usarlo debemos configurar nuestro archivo de configuración de webpack
+
+en la parte de la lectura de archivos, es decir, en el atributo test de las reglas en donde definimos css, también 
+agregamos la extensión sass:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.css|.scss$/i,
+                use: [
+                    MiniCssExtractPlugin.loader, 
+                    'css-loader',
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }), 
+
+        new MiniCssExtractPlugin()
+    ]
+}
+
+y tambien agregamos el loader de sass
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css|$/i,
+                use: [
+                    MiniCssExtractPlugin.loader, 
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }), 
+
+        new MiniCssExtractPlugin()
+    ]
+}

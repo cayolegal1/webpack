@@ -1,0 +1,3 @@
+básicamente en estas notas estarán como configurar los archivos de webpack y los pasos a seguir en nuestros archivos 
+para poder generar lo que estamos esperando, como también las instalaciones de los paquetes que estaremos 
+utilizando

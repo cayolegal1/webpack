@@ -1,0 +1,246 @@
+webpack nos permite copiar archivos, esto con el fin de que por ejemplo querramos mover algunos elementos a la carpeta 
+de distribution que crea webpack cuando realiza su tarea, por eso es que aprenderemos como copiar archivos. Ya sean 
+estos imágenes, vídeos, archivos, etc de ser necesario. Todo esto lo lograremos un plugin el cual se llama 
+copy-webpack el cual nos ayudará a mover o copiar los archivos que necesitemos. Lo primero es instalarlo: 
+
+- npm install copy-webpack-plugin -D
+
+Ahora tenemos que definir que archivos queremos mover o copiar desde en este caso a carpeta src hacia la dist de 
+webpack, y eso lo haremos en el archivo de configuración de webpack. En este caso moveremos las imágenes y fuentes 
+del proyecto, pero primero partiremos por las imágenes.
+
+Lo primero que haremos es importar el plugin que instalamos en el archivo de config webpack:
+
+const CopyWebpack = require('copy-webpack-plugin')
+
+luego en la parte de plugins de nuestro módulo, creamos una instancia de ese paquete:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyWebpack()
+    ]
+}
+
+y en esa instanciación haremos una configuración de cuales archivos queremos copiar y hacia donde, en ese caso, 
+crearemos un objeto en esa instanciación:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyWebpack({
+
+        })
+    ]
+}
+
+el primer atributo será patterns, que contendrá los elementos a utilizar, ya que será más de uno debe ser un arreglo, 
+que contendrá objetos, en los que estos estarán desde donde lo moveremos y hacia donde, para posicionarnos donde 
+estamos en el archivo, usamos como anteriormente lo hicimos, al paquete path y su método resolve, que da la ruta 
+absoluta del archivo en donde es llamada con el valor de __dirname, y luego los otros parámetros son las rutas 
+que asignemos nosotros entre comas
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyWebpack({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images')
+                }
+            ]
+        })
+    ]
+}
+
+y luego usamos el atributo "to", para indicar hacia donde queremos mover los elementos, y lo haremos colocando la ruta 
+en la que queremos que se mueva, ya que por defecto los archivos irán a la carpeta distribution, pero dentro de esa 
+carpeta crearemos otra ruta:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin(),
+
+        new CopyWebpack({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ]
+}
+
+Luego de hacer todo eso, debemos hacer algunas modificaciones en el Template que tenemos de html en nuestro 
+archivo template.js, ya que el llamado a estos archivos no es el correcto, sino debe ser a assets/images y 
+el archivo que estemos utilizando
+
+Luego de realizar esas configuraciones, podemos correr nuestro comando para que se actualice nuestro webpack
+
+- npm run production
+
+Y con eso ya tendríamos que tener nuestros archivos copiados al folder que mencionamos en la config :D

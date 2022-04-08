@@ -1,0 +1,156 @@
+para poder usar webpack con html, debemos instalar el siguiente plugin de webpack: 
+
+- npm install html-webpack-plugin -D
+
+luego en nuestro archivo de configuración de webpack, en este caso webpack.config.js debemos importar el paquete 
+que instalamos
+
+const html = require('html-webpack-plugin') 
+
+luego en el módulo que estamos exportando como un objeto, debemos agregar el atributo 'plugins'
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    },
+
+    plugins: []
+}
+
+y luego instanciamos el paquete que estamos requiriendo como html en nuestro arreglo de plugins
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    },
+
+    plugins: [
+        new html()
+    ]
+}
+
+y internamente de esa instanciación debemos crear un objeto con las configuraciones que estamos deseando hacer, tales 
+como: inject, para que haga la inserción de los elementos. El template, que en nuestro caso esta en el folder 
+public y el archivo es index.html, por lo que tenemos que poner la ruta de donde se encuentra, esta puede ser 
+relativa, con decir template nos estamos refiriendo al archivo al cual queremos que webpack haga lo suyo. Luego 
+la última configuración es el nombre del archivo que queremos que webpack nos cree, con filename
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    },
+
+    plugins: []
+}
+
+y luego instanciamos el paquete que estamos requiriendo como html en nuestro arreglo de plugins
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    },
+
+    plugins: [
+        new html({
+
+            inject: true,
+            template: './public/index.html',
+            filename: main.html
+        })
+    ]
+}
+
+Con todo eso, ya tenemos lista la configuración de nuestro html webpack plugin. Ahora debemos hacer ciertas 
+modificaciones a nuestro archivo index.html o template, ya que tenemos cosas innecesarias como poner el nombre del 
+script al cual nos estamos refiriendo, ya que eso webpack lo hace por nosotros en la configuración que hemos hecho, 
+en el atributo entry del modulo que exportamos del archivo de config
+
+Hecho eso ya tenemos lista la configuración y nuestro archivo para poder ejecutar en la terminal nuestros comandos 
+de webpack
+
+- npx webpack --mode production --config webpack.config.js
+

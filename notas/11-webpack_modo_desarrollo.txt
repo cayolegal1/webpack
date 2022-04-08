@@ -1,0 +1,142 @@
+en estas notas veremos más a profundidad webpack en modo de desarrollo, que podemos diferenciar del modo producción 
+y que podemos tener en uno y en otro según sea el caso.
+
+lo primero que haremos es copiar todo nuestro archivo de configuración de webpack principal y pegar en un nuevo 
+archivo el cual será la configuración de webpack pero en modo desarrollo, la diferencia del principal esta en que 
+crearemos el archivo con la extensión .config.dev.js mientras que el principal solo tiene .config.js. Entonces 
+copiamos y pegamos todo el archivo y veremos que nos sirve y que no  
+
+por ejemplo, no necesitamos optimizar en modo de desarrollo, por lo que podemos borrar este apartado:
+
+optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin(),
+
+        ]
+    }
+
+
+como también los requerimientos a paquetes de instalación, tampoco son necesarios:
+
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const TerserMinimizerPlugin = require('terser-webpack-plugin')
+
+luego para poder activar la configuración del modo de desarrollo, debemos agregar un atributo el cual su nombre 
+o key será mode, y su valor será 'development', todo esto en el apartado principal del módulo
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+
+    mode: 'development',
+
+    resolve: {
+
+        extensions: ['.js'],
+
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/'),
+            '@images': path.resolve(__dirname, 'src', 'assets', 'images/'),
+            '@templates': path.resolve(__dirname, 'src', 'templates/' ),
+            '@styles': path.resolve(__dirname, 'src', 'styles/'),
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        }),
+
+        new dotEnvWebpack()
+    ],
+
+}
+luego de eso, nos iremos a nuestro package.json, en donde ya no hará falta ejecutar el modo en el que queremos correr 
+webpack, es decir, el comando npx webpack --mode development o production, porque haremos un script en donde 
+ejecutaremos directamente este archivo de desarrollo y no el de producción, el script será: 
+
+- "dev": "npx webpack --config webpack.config.dev.js"
+
+esto nos creará archivos en modo desarrollo de todo nuestro proyecto, en donde podremos ver mejor algún bug o alguna 
+optimización que queremos hacer
+
+
+para más info sobre los modos de webpack:
+https://medium.com/webpack/webpack-4-mode-and-optimization-5423a6bc597a

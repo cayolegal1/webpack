@@ -1,0 +1,121 @@
+lo primero que debemos hacer para configurar nuestro proyecto, es crear un nuevo archivo que tenga una 
+extensión .config.js 
+
+en ese archivo debemos importar un paquete que node ya lo tiene instalado de por sí que es path 
+
+const path = require('path')
+
+luego debemos crear un modulo que exportaremos con un objeto el cual tendrá las configuraciones de nuestro proyecto 
+
+module.exports = {
+
+}
+
+este módulo contendrá la ruta del entry point o el archivo principal del cual webpack se guiará, 
+
+
+module.exports = {
+
+    entry: './src/index.js'
+}
+
+
+la ubicación del output o el resultado de lo que webpack hará con ese archivo, el cual será un objeto en el cual 
+usaremos el paquete que importamos de node, path 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path
+    }
+
+}
+
+en el valor de path utilizaremos el método que el contiene, el cual es resolve, que nos ayudará para saber en qué 
+directorio nos  encontramos, para resolver los problemas cuando subamos nuestro proyecto a producción. Tenemos que 
+pasar como valor a __dirname para lograr lo que dije antes, que es saber en que directorio estamos parados. 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname)
+    }
+
+}
+
+Luego el siguiente valor es la ruta en donde queremos que webpack tirará los resultados, por defecto, es 
+recomendable poner 'dist' ya que es el que webpack usa para generar sus resultados.
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist')
+    }
+
+}
+
+Luego de especificar el directorio, es momento de especificar el archivo en el cual queremos que se ejecute, por 
+defecto, también podemos poner el que webpack genera, que es 'main.js' pero puede ser cualquiera. Esto lo logramos 
+con el siguiente valor del objeto output el cual es 'filename' y le asignamos como valor el nombre del archivo 
+a generarse
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    }
+
+}
+
+Luego de especificar las ubicaciones de entrada y salida de datos, tenemos que especificarle a webpack con que 
+extensiones de archivos queremos trabajar, entonces creamos un nuevo objeto en nuesto módulo al cual llamaremos 
+resolve
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+    }
+
+}
+
+El cual recibirá como llave el nombre de 'extensions' que será un array de las extensiones con la cual esperamos 
+configurar 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js', '.css', '.html']
+    }
+
+}
+
+Una vez tengamos toda la configuración debemos correr nuestro comando de siempre 
+
+- npx webpack --mode production 
+
+Pero esta vez con un flag adicional que es --config, que sirve para poder setear un archivo en el cual se encuentra 
+nuestra configuración, en nuestro caso es: 
+
+- npx webpack --mode production --config webpack.config.js
+
+para evitarnos todo este comando podemos generar un script en package.json que ejecute el comando de una manera 
+más amigable
+
+

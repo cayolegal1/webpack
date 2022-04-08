@@ -1,0 +1,351 @@
+webpack trae consigo un feature (característica) muy bonita que es el poder simplificar las rutas o paths hacia nuestros archivos con alias en las configuraciones, es decir, nombres claves en donde declaramos explícitamente el alias hacia esa ruta por lo que nuestro código será mucho mas amigable, eso lo podemos lograr yendo al archivo de configuración de webpack. 
+
+un ejemplo de lo que soluciona esto es por ejemplo evitar hacer este tipo de cosas: 
+
+import paquete from '../../../../../src/archivo'
+
+esto se vuelve un poco confuso a la hora de poder saber en que parte se encuentra nuestro recurso
+
+para solucionar eso vamos al archivo de configuración de webpack en la parte de resolve y agregar un nuevo atributo 
+el cual se llamará alias el cual su valor será un objeto que contendrán los alias, creemos el objeto
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js'],
+        alias: {
+
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+ahora una cosa importante, los keys serán los alias, pero este debe ser un string con un @, es decir, '@alias' y el 
+valor de este será la ruta o path del cual queremos acortar el nombre para que nuestro código sea más amigable.
+Vayamos al archivo de template.js del folder templates  y veamos las rutas de las importaciones de nuestros archivos:
+
+import getData from '../utils/getData.js';
+import gitHub from '../assets/images/github.png'
+import Instagram from '../assets/images/instagram.png'
+import Twitter from '../assets/images/twitter.png'
+
+como vemos, la ruta a la vista no es muy amigable, por lo que haremos un alias para utils, por ejemplo. Tendremos que 
+usar el módulo path y su método resolve que nos da la ubicación de donde estamos parados en el archivo y para que no 
+tengamos problemas con las rutas al hacer deploy
+
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js'],
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/')
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+ahora podemos hacer con los demás paths que estamos usando y que vamos a utilizar
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js'],
+
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/'),
+            '@images': path.resolve(__dirname, 'src', 'assets', 'images/'),
+            '@templates': path.resolve(__dirname, 'src', 'templates/' ),
+            '@styles': path.resolve(__dirname, 'src', 'styles/'),
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        })
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin()
+
+        ]
+    }
+}
+
+con esa configuración ya podemos ir cambiando las rutas llenos de slashes '/', a rutas más cortas e amigables
+
+template.js:
+
+import getData from '@utils/getData.js';
+import gitHub from '@images/github.png'
+import Instagram from '@images/instagram.png'
+import Twitter from '@images/twitter.png'
+
+index.js: 
+
+import Template from '@templates/Template.js';
+import '@styles/main.css'
+import '@styles/styles.scss'
+
+y

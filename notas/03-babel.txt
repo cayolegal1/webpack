@@ -1,0 +1,170 @@
+para que nuestro código pueda correr en cualquier navegador, desde explorer hasta chrome, debemos usar una dependencia 
+de node el cual se llama babel, este lo que hace es compilar todo el código original del proyecto a uno que pueda 
+ser entendido por el navegador, así nos evitamos problemas.
+
+para instalarlo corremos el siguiente comando: 
+
+- npm install babel-loader @babel/core @babel/preset-env @babel/plugin-transform-runtime -D 
+
+luego debemos crear un archivo de configuración de babel con extensión .babelrc, en nuestro caso será .babelrc
+
+luego de crear nuestro archivo creamos un objeto en donde irán nuestras  configuraciones 
+
+{
+
+}
+
+en donde estas configuraciones serán los presets para trabajar con javascript moderno y los plugins que utilizará 
+babel, entonces empezamos a llenar nuesto objeto con los presets que básicamente nos permite trabajar babel con 
+js moderno, y los plugins que nos añade funcionalidad extra: 
+
+{
+    "presets": [
+        "@babel/preset-env",
+    ]
+    "plugins": [
+        "babel/plugin-transform-runtine"
+    ]
+}
+
+luego de realizar toda la configuración debemos añadir esa configuración en el archivo de configuración de 
+webpack.
+
+para indicar a webpack que estamos trabajando con javascript moderno debemos usar babel y sus configuraciones
+
+si ya tenemos la configuración de nuestro archivo .babelrc entonces podemos proceder a añadirlo a nuestro archivo de 
+configuración de webpack, al módulo que exportaremos como objeto entonces le agregamos un atributo más el cual será 
+module, que su valor será un array de objetos: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    }, 
+
+    module: [
+        {
+
+        }
+    ]
+}
+
+uno de los objetos será rules, el cual nos permitirá establecer las reglas con la cual trabajaremos el proyecto, 
+el cual será un array de objetos el cual nos permitirá establecer nuestras reglas dentro de los objetos
+
+crearemos un objeto y el primer atributo de nuestro objeto será test, el cual nos permitirá saber que tipo de 
+extensiones vamos a estar utilizando, el cual tiene como valor una expresión regular básicamente diciendo 
+el patrón de archivos a utilizar
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    }, 
+
+    module: [
+        {
+            test: /\.m?sjs$/ 
+        }
+    ]
+}
+
+esa expresión regular basicamente dice que trabajaremos con todo lo que sea de extensión de módulo (.mjs) o 
+javascript (.js), pero existe un problema con eso ya que las dependencias de node_modules tienen extensión .mjs 
+ya que son modulos, entonces debemos crear un atributo más a nuestro objeto el cual excluya los archivos de node_modules, y ese será exclude, el cual será tambien una expresión regular pero más sencilla: 
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    }, 
+
+    module: [
+        {
+            test: /\.m?sjs$/, 
+            exclude: /node_modules/
+        }
+    ]
+}
+
+luego de hacer todo eso crearemos otro atributo el cual será un objeto que tendrán los loaders y plugins de babel, 
+Los loaders perminten preprocesar archivos. Esto te permite empaquetar cualquier recurso estático más allá de JavaScript. Son los que permiten importar archivos de CSS dentro de tu JS, por ejemplo.
+
+llamaremos a nuestro atributo use:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    }, 
+
+    module: [
+        {
+            test: /\.m?sjs$/, 
+            exclude: /node_modules/,
+            use: {
+                
+            }
+        }
+    ]
+}
+
+el cual tendrá un atributo que se llame loader para indicar que usaremos el loader de babel:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js'
+    },
+    resolve: {
+
+        extensions: ['.js']
+    }, 
+
+    module: {
+            rules: [
+            {
+                test: /\.m?sjs$/, 
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    }
+}
+
+OBS: desde el principio tendría que estar rules, el cual su valor es el array de objetos con las reglas dentro 
+de los objetos

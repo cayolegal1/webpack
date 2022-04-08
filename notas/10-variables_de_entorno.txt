@@ -1,0 +1,189 @@
+las variables de entorno es el lugar seguro donde podemos guardar información sensible, ya sea la ruta de una API, 
+conexión a base de datos, etc etc que no queremos mostrar en el código en si. Nos permitirá consumir esa información 
+sensible desde nuestro archivo de variables de entorno y no exponerla. 
+
+Las variables de entorno son variables externas a nuestra aplicación que residen en el sistema operativo o en el contenedor de la aplicación que se está ejecutando. Una variable de entorno es simplemente un nombre asignado a un valor como una variable es cualquier lenguaje de programación.
+Aquí te dejo esta lectura super genial de variables de entorno
+
+----OBS IMPORTANTE: ----
+
+Si quedan ocultas estas variables? En la clase se pude ver que la API tiene el valor de la variable de entorno dentro del archivo main.js.
+De que van a estar en el archivo final las llaves, si estarán expuestas, por ello se debe tener una buena estructura de seguridad entre Backend y Frontend, podrás ver como por ejemplo en el Curso de Integración de Backend y Frontend que se tiene una estrategia adicional a una API Key que es a través de Tokens
+
+
+
+Y en caso de frontend que otros datos debo guardar en variables de entorno?
+suelen guardarse variables que pueden cambiar en los diferentes entornos como los URLs de las diferentes APIs que utiliza dicho front u otras variables como access_key para acceder a ciertos servicios como Firebase. Es importante no confundir un access_key, que suelen ser datos públicos, con secrets_key que NO deben guardarse en apps frontend.
+
+
+
+Hay alguna manera de tener oculto del todo las variables de entorno?, que con el inspeccionador de elementos, se puede ver el valor en los archivos fuentes...
+Usando un servidor 👀 Con los servidores las variables de entorno solo viven allá y no son visibles.
+En este caso por eso usamos variables de entorno que NO contienen información sensible. Si usas variables con información sensible lo mejor es que uses un servidor 
+-------------------------
+
+Lo primero que debemos hacer es instalar un paquete que nos ayudará a trabajar con las variables de entorno, y ese 
+es dotenv:
+
+- npm install dotenv-webpack -D 
+
+una vez instalado el paquete, podemos proceder al paso siguiente, que es crear un archivo con extensión .env en donde 
+vivirán nuestras variables de entorno, este puede no tener nombre pero la ext es importante, hay que ponerla en la raíz 
+del proyecto. Este archivo no se sube al repo.
+
+si entramos a un proyecto el cual ya esta desarrollado en cierta manera, es importante pedir estas variables de 
+entorno para poder poder empezar a aportar al proyecto. 
+
+es importante tener también otro archivo .env pero a este le agregaremos un .example, quedando .env.example, estos 
+tendrán los elementos ejemplos de que variables son necesarias tenerlas en el proyecto realizado, así podremos pedir 
+al líder del equipo estos datos mencionados
+
+para realizar un ejemplo sencillo, vamos a agregar en nuestro archivo .env la API que estamos solicitando en el archivo 
+getData.js, ya que esta es información sensible 
+
+.env: 
+
+API='https://randomuser.me/api/'
+
+y en el .env.example colocaremos lo mismo pero sin la información, ya que este archivo solo nos sirve para saber 
+que datos debemos manejar
+
+.env.example: 
+
+API= 
+
+Luego vamos a nuestra configuración de webpack en donde vamos a requerir la dependencia que instalamos: 
+
+const dotEnvWebpack = require('dotenv-webpack')
+
+cabe destacar que este paquete es un plugin
+
+y luego como mencionamos que es un plugin, haremos una instancia de nuestra importación en el apartado de 
+plugins:
+
+module.exports = {
+
+    entry: './src/index.js',
+    output: {
+
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].[contenthash].js',
+        assetModuleFilename: "assets/images/[hash][ext][query]"
+    },
+    resolve: {
+
+        extensions: ['.js'],
+
+        alias: {
+
+            '@utils': path.resolve(__dirname, 'src', 'utils/'),
+            '@images': path.resolve(__dirname, 'src', 'assets', 'images/'),
+            '@templates': path.resolve(__dirname, 'src', 'templates/' ),
+            '@styles': path.resolve(__dirname, 'src', 'styles/'),
+
+        }
+    },
+
+    module: {
+        rules: [ 
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    
+                    loader: 'babel-loader'
+                }
+            },
+
+            {
+                test: /\.s?css$/i,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ]
+            }, 
+
+            {
+                test: /\.png/,
+                type: 'asset/resource'
+            },
+
+            {
+                test: /\.(woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/fonts/[hash][ext][query]',
+                },
+                // use: {
+                //     loader: 'url-loader',
+                //     options: {
+                //         limit: 10000,
+                //         mimetype: 'application/font-woff',
+                //         name: "[name].[ext]",
+                //         outputPath: './assets/fonts',
+                //         publicPaths: './assets/fonts', 
+                //         esModule: false
+                //     }
+                // }
+
+    
+            }
+        ],
+
+    },
+    
+    plugins: [
+        new html_webpack_plugin({
+            inject: true,
+            template: './public/index.html',
+            filename: './main.html'
+        }),
+
+        new MiniCssExtractPlugin({
+
+            filename: 'assets/[name][contenthash].css'
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src', 'assets', 'images'),
+                    to: "assets/images"
+                }
+            ]
+        }),
+
+        new  new dotEnvWebpack()
+    ],
+
+    optimization: {
+
+        minimize: true,
+        minimizer: [
+
+            new CssMinimizerPlugin(),
+            new TerserMinimizerPlugin(),
+           
+
+        ]
+    }
+}
+
+con eso configurado podremos consumir nuestras variables de entorno en nuestros archivos desde nuestro archivo .env, es decir, las leeremos directamente desde nuestro archivo de variables de entorno, hagamos el ejemplo del getData.js.
+
+todas las variables podrán ser accedidas a través de process.env, que nos permiten leer lo que determinamos 
+
+process es un objeto global que viene instalado con Node.js (¿recuerdas? la forma de ejecutar Javascript del lado del servidor💻) y sirve para escuchar eventos del programa que estás creando. ¿Esto significa que la app que estoy programando es un proceso? Es correcto.
+.
+En computación tanto tu CPU como tu GPU son capaces de correr múltiples procesos y dentro de cada proceso hay un hilo. Es decir, tu programa es un proceso que tiene distintos módulos enfocados a hacer diferentes cosas, cada una de ellas siendo un hilo. De esta forma, puedes usar Node.js para averiguar información del programa que estás construyendo. Puedes determinar funciones que hagan algo cuando se encienda o termine tu programa process.on, puedes acceder a variables de entorno process.env, puedes manejar errores, etc.
+
+entonces en el archivo de getData.js estaría quedando de esta manera: 
+
+API = process.env.API 
+
+reemplazando a 
+
+API = 'https://randomuser.me/api/'
+
+cuando ejecutemos el comando npm run production todo debería estar funcionando :D
