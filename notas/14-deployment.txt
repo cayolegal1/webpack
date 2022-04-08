@@ -28,3 +28,5 @@ el comando que tenemos en scripts que es npm run production
     command = 'npm run production'
 
 Luego subiremos estos cambios a nuestro repositorio remoto
+
+Luego de eso nos vamos a Netlify y hacemos el deployment y debería funcionar
