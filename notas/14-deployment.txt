@@ -3,4 +3,28 @@ encargadas de ello. En este momento, utilizaremos Netlify como nuestra plataform
 
 Lo primero a realizar es crearnos una cuenta en www.netlify.com, usamos nuestra cuenta de Github para ello. 
 
-Segundo, crearemos un repositorio en donde alojaremos este proyecto
+Segundo, crearemos un repositorio en donde alojaremos este proyecto para poder conectarlo a la plataforma 
+
+Tercero, crearemos un archivo de configuración para Netlify, con extensión .toml, es importante que le pongamos 
+el nombre netlify para que lea que es de  esta plataforma. 
+
+Luego, vamos a crear una configuración en ese mismo archivo, lo primero es colocar [build] que anuncia el build 
+que vamos a ejecutar, el build quiere decir cuando ya tenemos todo configurado y queremos mandar el proyecto 
+para que este ok para producción, entonces en netlify.toml: 
+
+[build]
+
+y agregamos una pequeña indentación para poner las configuraciones, lo primero que determinaremos será la carpeta 
+que queremos publicar, con publish, y en este caso es el folder distribution
+
+[build]
+    publish = 'dist'
+
+luego agregaremos el comando que vamos a ejecutar para el despliegue de la página, con command, y de valor 
+el comando que tenemos en scripts que es npm run production
+
+[build]
+    publish = 'dist'
+    command = 'npm run production'
+
+Luego subiremos estos cambios a nuestro repositorio remoto
